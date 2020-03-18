@@ -66,7 +66,7 @@ cores <- detectCores()
 print(cores)
 
 source("RT.R")
-source("power_calc.R")
+source("power.R")
 
 Result_table <- data.frame(
   design = character(),

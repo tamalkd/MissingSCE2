@@ -37,7 +37,7 @@ replications = 10000        # Number of simulated datasets
 strt <- Sys.time()
 
 source("RT.R")
-source("power_calc.R")
+source("power.R")
 
 set.seed(1000)  # Set random seed to make results exactly reproducible
 
