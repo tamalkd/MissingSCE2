@@ -161,6 +161,7 @@ for(rnum in 1:nrow(Result_table))
   row <- Result_table[rnum,]
   
   start <- Sys.time()
+  set.seed(1000)  # Set random seed to make results exactly reproducible
   
   # output <- foreach(
   #   it = 1:replications, 
