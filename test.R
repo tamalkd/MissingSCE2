@@ -151,6 +151,7 @@ for (i in 1:length(designs))
     }
   }
 }
+print(Result_table)
 
 for(rnum in 1:nrow(Result_table))
 {
@@ -163,38 +164,40 @@ for(rnum in 1:nrow(Result_table))
   
   ### Run parallel
   
-  # cl <- makeCluster(max(cores - 2, 1))
+  # cl <- makeCluster(max(cores - 3, 1))
   # registerDoParallel(cl)
   # 
   # output <- foreach(
-  #   it = 1:replications, 
-  #   .inorder = FALSE, 
-  #   .combine = 'c', 
-  #   .packages = c("MASS", Rcpp", "data.table", "imputeTS", "mice"), 
+  #   it = 1:replications,
+  #   .inorder = FALSE,
+  #   .combine = 'c',
+  #   .packages = c("MASS", "Rcpp", "data.table", "imputeTS", "mice"),
   #   .noexport = c("NAP_cpp")
   # ) %dopar%
   # {
   #   sourceCpp("NAP.cpp") # Explicitly source C++ script inside loop to satisfy foreach
-  #   
+  # 
   #   result <- Calculate_power_RT(
-  #     design = row$design, 
-  #     model = row$model, 
-  #     ESM = row$ESM, 
-  #     ES = row$ES, 
-  #     N = row$N, 
+  #     design = row$design,
+  #     model = row$model,
+  #     ESM = row$ESM,
+  #     ES = row$ES,
+  #     N = row$N,
   #     method = row$method,
   #     missprop = row$missprop,
   #     misstype = row$misstype,
-  #     alfa = alfa, 
-  #     AR = AR, 
+  #     alfa = alfa,
+  #     AR = AR,
   #     corr = corr,
-  #     direction = direction, 
-  #     limit_phase = limit_phase, 
+  #     direction = direction,
+  #     limit_phase = limit_phase,
   #     nCP = nCP,
-  #     nMC = nMC, 
+  #     nMC = nMC,
   #     nMI = nMI
   #   )
   # }
+  # 
+  # stopCluster(cl)
   
   ### Run without parallelization
   
