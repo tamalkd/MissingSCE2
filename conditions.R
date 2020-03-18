@@ -6,13 +6,14 @@
 
 ### All simulation conditions
 
-designs <- c("MBD", "RBD", "ABAB")          # SCE design types
-models <- c("AR1", "normal", "uniform")     # Data models
-ESMs <- c("MD", "NAP")                      # Test statistics
-ESs <- c(0, 1, 2)                           # Effect sizes
-Ns <- c(40, 30, 20)                         # Number of measurements
-methods <- c("full", "marker", "TS", "MI")  # Missing data handling methods
-missings <- c(0.1, 0.3, 0.5)                # Proportion of missing data 
+designs <- c("RBD", "ABAB")                               # SCE design types
+models <- c("AR1", "normal", "uniform", "bvn")            # Data models
+ESMs <- c("MD", "NAP")                                    # Test statistics
+ESs <- c(0, 1, 2)                                         # Effect sizes
+Ns <- c(40, 30, 20)                                       # Number of measurements
+methods <- c("full", "marker", "TS", "MI")                # Missing data handling methods
+missprops <- c(0.1, 0.3, 0.5)                             # Proportion of missing data 
+misstypes <- c("censor+", "censor-", "bvn+", "bvn-")      # Mechanism used to generate missing data
 
 ### Generate all possible combinations of simulation conditions
 
@@ -25,7 +26,8 @@ Result_table <- data.frame(
   ES = numeric(),
   N = integer(),
   method = character(),
-  missing = numeric(),
+  missprop = numeric(),
+  misstype = character(),
   stringsAsFactors = FALSE
 )
 
@@ -52,25 +54,36 @@ for (i in 1:length(designs))
                 ES = ESs[l], 
                 N = Ns[m], 
                 method = methods[n],
-                missing = 0
+                missprop = 0,
+                misstype = ""
               )
               Result_table <- rbind(Result_table, outlist)
             } else
             {
-              for(o in 1:length(missings))
+              for(o in 1:length(missprops))
               {
-                outlist <- data.frame(
-                  design = designs[i], 
-                  model = models[j], 
-                  ESM = ESMs[k], 
-                  ES = ESs[l], 
-                  N = Ns[m], 
-                  method = methods[n],
-                  missing = missings[o]
-                )
-                Result_table <- rbind(Result_table, outlist)
+                for(p in 1: length(misstypes))
+                {
+                  if((models[j] == "bvn") && (misstypes[p] %in% c("bvn+", "bvn-"))
+                     || (models[j] != "bvn") && !(misstypes[p] %in% c("bvn+", "bvn-")))
+                  {
+                    outlist <- data.frame(
+                      design = designs[i], 
+                      model = models[j], 
+                      ESM = ESMs[k], 
+                      ES = ESs[l], 
+                      N = Ns[m], 
+                      method = methods[n],
+                      missprop = missprops[o],
+                      misstype = misstypes[p]
+                    )
+                    Result_table <- rbind(Result_table, outlist)
+                  }
+                  
+                }
               }
             }
+            
           }
         }
       }
