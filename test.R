@@ -23,24 +23,24 @@
 
 ### All simulation conditions (for reference)
 
-# designs <- c("RBD", "ABAB")
-# models <- c("AR1", "normal", "uniform", "bvn")
-# ESMs <- c("MD", "NAP")
-# ESs <- c(0, 1, 2)
-# Ns <- c(40, 30, 20)
-# methods <- c("full", "marker", "TS", "MI")
-# missprops <- c(0.1, 0.3, 0.5)
-# misstypes <- c("censor+", "censor-", "bvn+", "bvn-")
+# designs <- c("RBD", "ABAB")                            # SCE design types
+# models <- c("AR1", "normal", "uniform", "bvn")         # Data models
+# ESMs <- c("MD", "NAP")                                 # Test statistics
+# ESs <- c(0, 1, 2)                                      # Effect sizes
+# Ns <- c(40, 30, 20)                                    # Number of measurements
+# methods <- c("full", "marker", "TS", "MI")             # Missing data handling methods
+# missprops <- c(0.1, 0.3, 0.5)                          # Proportion of missing data 
+# misstypes <- c("censor+", "censor-", "bvn+", "bvn-")   # Mechanism used to generate missing data
 
 ### Simulation conditions to test
 
 designs <- c("RBD", "ABAB")                            # SCE design types
-models <- c("normal", "AR1", "uniform", "bvn")         # Data models
+models <- c("AR1", "normal", "uniform", "bvn")         # Data models
 ESMs <- c("MD", "NAP")                                 # Test statistics
 ESs <- c(0, 1, 2)                                      # Effect sizes
 Ns <- c(40, 30, 20)                                    # Number of measurements
 methods <- c("full", "marker", "TS", "MI")             # Missing data handling methods
-missprops <- c(0.1, 0.3, 0.5)                          # Proportion of missing data 
+missprops <- c(0.1, 0.3, 0.5)                          # Proportion of missing data
 misstypes <- c("censor+", "censor-", "bvn+", "bvn-")   # Mechanism used to generate missing data
 
 ### Other parameters
@@ -156,18 +156,21 @@ for(rnum in 1:nrow(Result_table))
 {
   ### Run simulation with missing data
   
-  cl <- makeCluster(max(cores - 2, 1))
-  registerDoParallel(cl)
+  start <- Sys.time()
+  
+  set.seed(1000)  # Set random seed to make results exactly reproducible
   row <- Result_table[rnum,]
   
-  start <- Sys.time()
-  set.seed(1000)  # Set random seed to make results exactly reproducible
+  ### Run parallel
   
+  # cl <- makeCluster(max(cores - 2, 1))
+  # registerDoParallel(cl)
+  # 
   # output <- foreach(
   #   it = 1:replications, 
   #   .inorder = FALSE, 
   #   .combine = 'c', 
-  #   .packages = c("Rcpp", "data.table", "imputeTS", "mice"), 
+  #   .packages = c("MASS", Rcpp", "data.table", "imputeTS", "mice"), 
   #   .noexport = c("NAP_cpp")
   # ) %dopar%
   # {
@@ -192,6 +195,8 @@ for(rnum in 1:nrow(Result_table))
   #     nMI = nMI
   #   )
   # }
+  
+  ### Run without parallelization
   
   output <- numeric()
   for(it in 1:replications)
