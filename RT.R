@@ -13,7 +13,7 @@ sourceCpp("NAP.cpp")
 
 mean_diff <- function(scores.a, scores.b, method, direction)
 {
-  if(method == "marker" || method == "TS")
+  if(method == "marker" || method == "SI")
   {
     scores.a <- as.vector(na.omit(scores.a))
     scores.b <- as.vector(na.omit(scores.b))
@@ -30,7 +30,7 @@ mean_diff <- function(scores.a, scores.b, method, direction)
 
 NAP_calculation <- function(scores.a, scores.b, method, direction)
 {
-  if(method == "marker" || method == "TS")
+  if(method == "marker" || method == "SI")
   {
     scores.a <- as.vector(na.omit(scores.a))
     scores.b <- as.vector(na.omit(scores.b))
@@ -73,7 +73,7 @@ ESM_calc <- function(ESM, scores.a, scores.b, method, direction)
 ### Impute missing data using time series method
 ### Return data with missing data in place if model fitting fails
 
-TS_handler <- function(data)
+SI_handler <- function(data)
 {
   data[, 2] <- tryCatch(
     na.kalman(data[, 2], model = "auto.arima", smooth = TRUE), 
@@ -121,9 +121,9 @@ Compute_RT <- function(
 { 
   ### Impute missing data using time series method
   
-  if(method == "TS")
+  if(method == "SI")
   {
-    data <- TS_handler(data = data) 
+    data <- SI_handler(data = data) 
   }
   
   ### Randomization test for RBD

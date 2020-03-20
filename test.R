@@ -18,7 +18,7 @@
 # 'RT.R' 'power_calc.R' 'NAP.cpp'
 #
 # Please ensure the following R packages are installed:
-# 'foreach' 'parallel' 'doParallel' 'imputeTS' 'data.table' 'mice' 'Rcpp' 
+# 'foreach', 'parallel', 'doParallel', 'MASS', 'imputeTS', 'data.table', 'mice', 'Rcpp' 
 #####################
 
 ### All simulation conditions (for reference)
@@ -28,7 +28,7 @@
 # ESMs <- c("MD", "NAP")                                 # Test statistics
 # ESs <- c(0, 1, 2)                                      # Effect sizes
 # Ns <- c(40, 30, 20)                                    # Number of measurements
-# methods <- c("full", "marker", "TS", "MI")             # Missing data handling methods
+# methods <- c("full", "marker", "SI", "MI")             # Missing data handling methods
 # missprops <- c(0.1, 0.3, 0.5)                          # Proportion of missing data 
 # misstypes <- c("censor+", "censor-", "mvn+", "mvn-")   # Mechanism used to generate missing data
 
@@ -39,7 +39,7 @@ models <- c("AR1", "normal", "uniform", "mvn")         # Data models
 ESMs <- c("MD", "NAP")                                 # Test statistics
 ESs <- c(0, 1, 2)                                      # Effect sizes
 Ns <- c(40, 30, 20)                                    # Number of measurements
-methods <- c("full", "marker", "TS", "MI")             # Missing data handling methods
+methods <- c("full", "marker", "SI", "MI")             # Missing data handling methods
 missprops <- c(0.1, 0.3, 0.5)                          # Proportion of missing data
 misstypes <- c("censor+", "censor-", "mvn+", "mvn-")   # Mechanism used to generate missing data
 
