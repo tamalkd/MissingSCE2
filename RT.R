@@ -91,20 +91,15 @@ TS_handler <- function(data)
 
 MI_handler <- function(data, nMI, model)
 {
-  if(model == "mvn")
-  {
-    data <- data[,2:3]
-    cols <- 2
-  } else
+  if(model != "mvn")
   {
     data <- data[,1:2]
     data["Lead"] <- shift(data[,2], type = "lead")
     data["Lag"] <- shift(data[,2], type = "lag")
-    data <- data[,-1]
-    cols <- 3
   }
   
-  mi <- mice(data, m = nMI, method = c(rep("norm", cols)), remove_collinear = FALSE, printFlag = FALSE)
+  data <- data[,2:4]
+  mi <- mice(data, m = nMI, method = c(rep("norm", 3)), remove_collinear = FALSE, printFlag = FALSE)
   return(mi)
 }
 

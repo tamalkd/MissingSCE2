@@ -15,7 +15,11 @@ Generate_data <- function(model, N, missprop, misstype, AR, corr)
     "normal" = rnorm(n = N, mean = 0, sd = 1),
     "uniform" = runif(n = N, min = 0, max = sqrt(12)),
     "AR1" = arima.sim(model = list(ar = AR), n = N),
-    "mvn" = mvrnorm(n = N, mu = c(0,0), Sigma = matrix(c(1, corr, corr, 1), ncol = 2))
+    "mvn" = mvrnorm(
+      n = N, 
+      mu = c(0,0,0), 
+      Sigma = matrix(c(1, corr, corr, corr, 1, corr, corr, corr, 1), ncol = 3)
+    )
   )
   
   data_sim <- as.data.frame(data_sim)
