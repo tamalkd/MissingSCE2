@@ -7,13 +7,13 @@
 ### All simulation conditions
 
 designs <- c("RBD", "ABAB")                               # SCE design types
-models <- c("AR1", "normal", "uniform", "bvn")            # Data models
+models <- c("AR1", "normal", "uniform", "mvn")            # Data models
 ESMs <- c("MD", "NAP")                                    # Test statistics
 ESs <- c(0, 1, 2)                                         # Effect sizes
 Ns <- c(40, 30, 20)                                       # Number of measurements
 methods <- c("full", "marker", "TS", "MI")                # Missing data handling methods
 missprops <- c(0.1, 0.3, 0.5)                             # Proportion of missing data 
-misstypes <- c("censor+", "censor-", "bvn+", "bvn-")      # Mechanism used to generate missing data
+misstypes <- c("censor+", "censor-", "mvn+", "mvn-")      # Mechanism used to generate missing data
 
 ### Generate all possible combinations of simulation conditions
 
@@ -64,8 +64,8 @@ for (i in 1:length(designs))
               {
                 for(p in 1: length(misstypes))
                 {
-                  if((models[j] == "bvn") && (misstypes[p] %in% c("bvn+", "bvn-"))
-                     || (models[j] != "bvn") && !(misstypes[p] %in% c("bvn+", "bvn-")))
+                  if((models[j] == "mvn") && (misstypes[p] %in% c("mvn+", "mvn-"))
+                     || (models[j] != "mvn") && !(misstypes[p] %in% c("mvn+", "mvn-")))
                   {
                     outlist <- data.frame(
                       design = designs[i], 

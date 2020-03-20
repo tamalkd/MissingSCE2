@@ -15,17 +15,17 @@ Generate_data <- function(model, N, missprop, misstype, AR, corr)
     "normal" = rnorm(n = N, mean = 0, sd = 1),
     "uniform" = runif(n = N, min = 0, max = sqrt(12)),
     "AR1" = arima.sim(model = list(ar = AR), n = N),
-    "bvn" = mvrnorm(n = N, mu = c(0,0), Sigma = matrix(c(1, corr, corr, 1), ncol = 2))
+    "mvn" = mvrnorm(n = N, mu = c(0,0), Sigma = matrix(c(1, corr, corr, 1), ncol = 2))
   )
   
   data_sim <- as.data.frame(data_sim)
   
   ### Introduce missingness
   
-  if(misstype %in% c("censor+", "censor-", "bvn+", "bvn-"))
+  if(misstype %in% c("censor+", "censor-", "mvn+", "mvn-"))
   {
-    top_censor <- (misstype %in% c("censor+", "bvn+"))
-    col <- if(misstype %in% c("bvn+", "bvn-")) 2 else 1
+    top_censor <- (misstype %in% c("censor+", "mvn+"))
+    col <- if(misstype %in% c("mvn+", "mvn-")) 2 else 1
     
     sorted <- sort(data_sim[, col], decreasing = top_censor)
     trunc <- sorted[missprop * N]

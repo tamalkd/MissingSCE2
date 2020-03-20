@@ -91,7 +91,7 @@ TS_handler <- function(data)
 
 MI_handler <- function(data, nMI, model)
 {
-  if(model == "bvn")
+  if(model == "mvn")
   {
     data <- data[,2:3]
     cols <- 2
