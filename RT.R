@@ -70,7 +70,7 @@ ESM_calc <- function(ESM, scores.a, scores.b, method, direction)
   return(stat)
 }
 
-### Impute missing data using time series method
+### Impute missing data using single imputation method
 ### Return data with missing data in place if model fitting fails
 
 SI_handler <- function(data)
@@ -119,7 +119,7 @@ Compute_RT <- function(
   ABAB_idx     # Phase change indices for all possible ABAB randomizations
 )
 { 
-  ### Impute missing data using time series method
+  ### Impute missing data using single imputation method
   
   if(method == "SI")
   {
@@ -158,7 +158,7 @@ Compute_RT <- function(
       
     } else
     {
-      ### Calulate observed test statistic for complete data, randomized marker method, or time series method
+      ### Calulate observed test statistic for complete data, randomized marker method, or single imputation method
       
       observed.a <- data[, 2][data[, 1] == "A"]
       observed.b <- data[, 2][data[, 1] == "B"]
@@ -209,7 +209,7 @@ Compute_RT <- function(
         
       } else
       {
-        ### Calulate statistic for complete data, randomized marker method, or time series method
+        ### Calulate statistic for complete data, randomized marker method, or single imputation method
         
         ascores <- observed[assignment == "A"] 
         bscores <- observed[assignment == "B"]
@@ -255,7 +255,7 @@ Compute_RT <- function(
       
     } else
     {
-      ### Calulate observed test statistic for complete data, randomized marker method, or time series method
+      ### Calulate observed test statistic for complete data, randomized marker method, or single imputation method
       
       observed.a <- data[, 2][data[, 1] == "A"]
       observed.b <- data[, 2][data[, 1] == "B"]
@@ -341,7 +341,7 @@ Compute_RT <- function(
         
       } else
       {
-        ### Calulate statistic for complete data, randomized marker method, or time series method
+        ### Calulate statistic for complete data, randomized marker method, or single imputation method
         
         ascores <- c(observed[1:(index.a1[selection[it]])], observed[(1+index.b1[selection[it]]):index.a2[selection[it]]])
         bscores <- c(observed[(1+index.a1[selection[it]]):index.b1[selection[it]]], observed[(1+index.a2[selection[it]]):MT])
