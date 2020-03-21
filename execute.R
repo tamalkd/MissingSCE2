@@ -16,7 +16,7 @@ ES <- as.integer(args[4])            # Effect size
 N <- as.integer(args[5])             # Number of measurement
 method <- as.character(args[6])      # Missing data handling method
 missprop <- as.numeric(args[7])      # Proportion of missing data 
-misstypes <- as.character(args[8])   # Mechanism used to generate missing data
+misstypes <- as.character(args[8])   # Missing data mechanism
 
 options(warn=-1)
 

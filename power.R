@@ -17,7 +17,7 @@ Generate_data <- function(model, N, missprop, misstype, AR, corr)
     "AR1" = arima.sim(model = list(ar = AR), n = N),
     "mvn" = mvrnorm(
       n = N, 
-      mu = c(0,0,0), 
+      mu = c(0, 0, 0), 
       Sigma = matrix(c(1, corr, corr, corr, 1, corr, corr, corr, 1), ncol = 3)
     )
   )
@@ -35,6 +35,11 @@ Generate_data <- function(model, N, missprop, misstype, AR, corr)
     trunc <- sorted[missprop * N]
     miss <- if(top_censor) (data_sim[, col] >= trunc) else (data_sim[, col] <= trunc)
     
+    data_sim[miss, 1] <- NA
+  } else
+  if(misstype == "mcar")
+  {
+    miss <- sample(N, missprop * N)
     data_sim[miss, 1] <- NA
   }
   
@@ -62,7 +67,7 @@ Calculate_power_RT <- function(
   N,               # Number of measurement
   method,          # Missing data handling method
   missprop = 0,    # Proportion of missing data 
-  misstype = "",   # Mechanism used to generate missing data
+  misstype = "",   # Missing data mechanism
   alfa,            # Level of significance
   AR,              # Autocorrelation
   corr,            # Correlation between bivariate normal vectors
