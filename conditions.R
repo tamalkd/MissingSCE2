@@ -64,8 +64,7 @@ for (i in 1:length(designs))
               {
                 for(p in 1: length(misstypes))
                 {
-                  if((models[j] == "mvn") && (misstypes[p] %in% c("mvn+", "mvn-"))
-                     || (models[j] != "mvn") && !(misstypes[p] %in% c("mvn+", "mvn-")))
+                  if((models[j] == "mvn") || (misstypes[p] %in% c("censor+", "censor-")))
                   {
                     outlist <- data.frame(
                       design = designs[i], 
