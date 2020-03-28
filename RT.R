@@ -4,6 +4,7 @@
 #########################
 
 library(imputeTS)
+library(VIM)
 library(data.table)
 library(mice)
 library(Rcpp)
@@ -73,16 +74,24 @@ ESM_calc <- function(ESM, scores.a, scores.b, method, direction)
 ### Impute missing data using single imputation method
 ### Return data with missing data in place if model fitting fails
 
-SI_handler <- function(data)
+SI_handler <- function(data, model)
 {
-  data[, 2] <- tryCatch(
-    na.kalman(data[, 2], model = "auto.arima", smooth = TRUE), 
-    error = function(e) { 
-      print("ARIMA failed!")
-      print(e)
-      return(data[, 2])
-    }
-  )
+  if(model == "mvn")
+  {
+    colnames(data) <- c("Labs", "Vals", "Cov1", "Cov2")
+    data <- regressionImp(Vals ~ Cov1 + Cov2, data)
+    data <- data[,1:4]
+  } else
+  {
+    data[, 2] <- tryCatch(
+      na_kalman(data[, 2], model = "auto.arima", smooth = TRUE), 
+      error = function(e) { 
+        print("ARIMA failed!")
+        print(e)
+        return(data[, 2])
+      }
+    )
+  }
   
   return(data)
 }
@@ -99,7 +108,7 @@ MI_handler <- function(data, nMI, model)
   }
   
   data <- data[,2:4]
-  mi <- mice(data, m = nMI, method = c(rep("norm", 3)), remove_collinear = FALSE, printFlag = FALSE)
+  mi <- mice(data, m = nMI, method = "norm", remove_collinear = FALSE, printFlag = FALSE)
   return(mi)
 }
 
@@ -123,7 +132,7 @@ Compute_RT <- function(
   
   if(method == "SI")
   {
-    data <- SI_handler(data = data) 
+    data <- SI_handler(data, model) 
   }
   
   ### Randomization test for RBD

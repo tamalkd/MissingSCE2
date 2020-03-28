@@ -18,7 +18,7 @@
 # 'RT.R' 'power_calc.R' 'NAP.cpp'
 #
 # Please ensure the following R packages are installed:
-# 'foreach', 'parallel', 'doParallel', 'MASS', 'imputeTS', 'data.table', 'mice', 'Rcpp' 
+# 'foreach', 'parallel', 'doParallel', 'MASS', 'imputeTS', 'VIM', 'data.table', 'mice', 'Rcpp' 
 #####################
 
 ### All simulation conditions (for reference)
@@ -53,7 +53,7 @@ limit_phase = 3             # Minimum number of measurements in a phase
 nCP = 1                     # Number of assignments per simulated dataset (>1 only if calcualting conditional power)
 nMC = 1000                  # Number of randomizations in Monte Carlo randomization test
 nMI = 10                    # Number of imputations in multiple imputation
-replications = 10000        # Number of simulated datasets
+replications = 1000         # Number of simulated datasets
 
 ### Run simulations
 
@@ -157,8 +157,6 @@ for(rnum in 1:nrow(Result_table))
   ### Run simulation with missing data
   
   start <- Sys.time()
-  
-  set.seed(1000)  # Set random seed to make results exactly reproducible
   row <- Result_table[rnum,]
   
   ### Run parallel
@@ -170,7 +168,7 @@ for(rnum in 1:nrow(Result_table))
   #   it = 1:replications,
   #   .inorder = FALSE,
   #   .combine = 'c',
-  #   .packages = c("MASS", "Rcpp", "data.table", "imputeTS", "mice"),
+  #   .packages = c("MASS", "Rcpp", "data.table", "imputeTS", 'VIM', "mice"),
   #   .noexport = c("NAP_cpp")
   # ) %dopar%
   # {
@@ -200,7 +198,9 @@ for(rnum in 1:nrow(Result_table))
   
   ### Run without parallelization
   
+  set.seed(1000)  # Set random seed to make results exactly reproducible (doesn't work with foreach)
   output <- numeric()
+  
   for(it in 1:replications)
   {
     output[it] <- Calculate_power_RT(
@@ -225,10 +225,11 @@ for(rnum in 1:nrow(Result_table))
   
   power <- mean(output)
   end <- Sys.time()
+  timer <- as.numeric(difftime(end, start, units = "secs"))
   
   Result_table[rnum,"power"] <- power
-  Result_table[rnum,"timer"] <- as.numeric(difftime(end, start, units = "secs"))
-  print(power)
+  Result_table[rnum,"timer"] <- timer
+  print(c(power, timer))
 }
 
 ### Publish results
