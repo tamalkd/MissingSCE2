@@ -16,7 +16,7 @@ ES <- as.integer(args[4])            # Effect size
 N <- as.integer(args[5])             # Number of measurement
 method <- as.character(args[6])      # Missing data handling method
 missprop <- as.numeric(args[7])      # Proportion of missing data 
-misstypes <- as.character(args[8])   # Missing data mechanism
+misstype <- as.character(args[8])    # Missing data mechanism
 
 options(warn=-1)
 
@@ -76,9 +76,9 @@ Result_table <- data.frame(
   method = method,
   missprop = missprop,
   misstype = misstype,
-  nMC = number_MC,
+  nMC = nMC,
   Reps = replications,
-  timer = difftime(end, strt, units = "secs"),
+  timer = as.numeric(difftime(end, strt, units = "secs")),
   power = power,
   stringsAsFactors = FALSE
 )
