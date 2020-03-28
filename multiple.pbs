@@ -1,13 +1,11 @@
 #!/bin/bash -l
-#PBS -l walltime=3:23:59:00
+#PBS -l walltime=0:23:59:00
 #PBS -l nodes=1:ppn=20:ivybridge
 #PBS -A lp_u0098719
 
-source switch_to_2015a
-module load R/3.4.2-foss-2015a
+module load R/3.4.4-intel-2018a-X11-20180131
 
-cd $VSC_DATA/sim1
+cd $VSC_DATA/sim2
 export OMP_NUM_THREADS=1
 
-Rscript execute.R $design $model $ESM $ES $N $method $missing
-
+Rscript execute.R $design $model $ESM $ES $N $method $missprop $misstype
