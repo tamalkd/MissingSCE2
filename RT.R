@@ -9,6 +9,7 @@ library(data.table)
 library(mice)
 library(Rcpp)
 sourceCpp("NAP.cpp")
+setDTthreads(1)
 
 ### Calculate mean difference test statistic
 
