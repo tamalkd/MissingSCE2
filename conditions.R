@@ -55,7 +55,7 @@ for (i in 1:length(designs))
                 N = Ns[m], 
                 method = methods[n],
                 missprop = 0,
-                misstype = ""
+                misstype = "none"
               )
               Result_table <- rbind(Result_table, outlist)
             } else

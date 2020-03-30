@@ -57,10 +57,11 @@ replications = 1000         # Number of simulated datasets
 
 ### Run simulations
 
+library(Rcpp)
+
 library(foreach)
 library(parallel)
 library(doParallel)
-library(Rcpp)
 
 cores <- detectCores()
 print(cores)
@@ -106,7 +107,7 @@ for (i in 1:length(designs))
                 N = Ns[m], 
                 method = methods[n],
                 missprop = 0,
-                misstype = "",
+                misstype = "none",
                 nMC = nMC,
                 Reps = replications,
                 timer = NA,
