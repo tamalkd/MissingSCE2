@@ -3,47 +3,59 @@
 # For running the simulations on a personal computer, please refer to 'test.R'.
 #########################
 
-library(MASS)
-
 source("RT.R")
 
 ### Generate simulation data
 
-Generate_data <- function(model, N, missprop, misstype, AR, corr) 
+Generate_data <- function(model, N, AR) 
 {
   data_sim <- switch(model,
     "normal" = rnorm(n = N, mean = 0, sd = 1),
     "uniform" = runif(n = N, min = 0, max = sqrt(12)),
     "AR1" = arima.sim(model = list(ar = AR), n = N),
-    "mvn" = mvrnorm(
-      n = N, 
-      mu = c(0, 0, 0), 
-      Sigma = matrix(c(1, corr, corr, corr, 1, corr, corr, corr, 1), ncol = 3)
-    )
+    "mvn" = matrix(rnorm(n = 3 * N, mean = 0, sd = 1), ncol = 3)
   )
   
   data_sim <- as.data.frame(data_sim)
-  
-  ### Introduce missingness
-  
-  if(misstype %in% c("censor+", "censor-", "mvn+", "mvn-"))
+  return(data_sim)
+}
+
+### Introduce missingness
+
+Add_missing <- function(data, N, missprop, misstype)
+{
+  if(misstype %in% c("trunc+", "trunc-", "mvn+", "mvn-"))
   {
-    top_censor <- (misstype %in% c("censor+", "mvn+"))
+    top_trunc <- (misstype %in% c("trunc+", "mvn+"))
     col <- if(misstype %in% c("mvn+", "mvn-")) 2 else 1
     
-    sorted <- sort(data_sim[, col], decreasing = top_censor)
+    sorted <- sort(data[, col], decreasing = top_trunc)
     trunc <- sorted[missprop * N]
-    miss <- if(top_censor) (data_sim[, col] >= trunc) else (data_sim[, col] <= trunc)
+    miss <- if(top_trunc) (data[, col] >= trunc) else (data[, col] <= trunc)
     
-    data_sim[miss, 1] <- NA
+    data[miss, 1] <- NA
   } else
   if(misstype == "mcar")
   {
     miss <- sample(N, missprop * N)
-    data_sim[miss, 1] <- NA
+    data[miss, 1] <- NA
   }
   
-  return(data_sim)
+  return(data)
+}
+
+### Adjust correlations of observed data and covariates for mvn
+
+Adjust_mvn_corr <- function(data, corr)
+{
+  norm <- data[, 1]
+  norm <- (norm - mean(norm)) / sd(norm)
+  coef <- corr / sqrt(1 - (corr ^ 2))
+  
+  data[, 2] <- (coef * norm + data[, 2]) / sqrt(1 + (coef ^ 2))
+  data[, 3] <- (coef * norm + data[, 3]) / sqrt(1 + (coef ^ 2))
+  
+  return(data)
 }
 
 ### Check if data for any treatment level is completely missing
@@ -78,9 +90,9 @@ Calculate_power_RT <- function(
   nMI              # Number of imputations in multiple imputation
 )
 {
-  ### Simulate dataset
-  data_obs <- Generate_data(model = model, N = N, missprop = missprop, misstype = misstype, AR = AR, corr = corr)
+  ### Define matrices for assignments
   
+  assignments <- matrix(nrow = nCP, ncol = N)
   ABAB_idx <- matrix()
   
   ### Randomly select randomization for RBD
@@ -89,7 +101,6 @@ Calculate_power_RT <- function(
   {
     ab <- c("A", "B")
     ba <- c("B", "A")
-    assignments <- matrix(nrow = nCP, ncol = N)
     
     for(i in 1:nCP)
     {
@@ -144,7 +155,6 @@ Calculate_power_RT <- function(
     
     ### Select assignment from list of all possible randomizations
     
-    assignments <- matrix(nrow=nCP, ncol=N)
     for(it in 1:nCP)
     {
       assignments[it, ] <- c(
@@ -159,6 +169,9 @@ Calculate_power_RT <- function(
     ABAB_idx <- matrix(c(index.a1, index.b1, index.a2), ncol = 3, byrow = FALSE)
   }
   
+  ### Simulate dataset
+  data_obs <- Generate_data(model = model, N = N, AR = AR)
+  
   ### Calculate p-value and whether H0 is rejected for simulated dataset
   
   count_rejections <- numeric()
@@ -168,13 +181,23 @@ Calculate_power_RT <- function(
   {
     ### Add effect size
     
-    data_shift <- data_obs
     labels <- assignments[i,] 
-    data_shift[labels == "B", 1] <- data_obs[labels == "B", 1] + ES 
+    data_shift <- data_obs
+    data_shift[labels == "B", 1] <- data_shift[labels == "B", 1] + ES
     
+    ### Add missingness and create dataset
+    
+    if(model == "mvn")
+    {
+      data_shift <- Adjust_mvn_corr(data = data_shift, corr = corr)
+    }
+    if(method != "full")
+    {
+      data_shift <- Add_missing(data = data_shift, N = N, missprop = missprop, misstype = misstype)
+    }
     data_input <- cbind(as.data.frame(labels, stringsAsFactors = FALSE), data_shift)
     
-    #print(data_input)
+    ### Calculate randomization test result
     
     if(method != "full" && Check_data_insufficient(data_input = data_input))
     {

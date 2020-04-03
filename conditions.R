@@ -13,7 +13,7 @@ ESs <- c(0, 1, 2)                                              # Effect sizes
 Ns <- c(40, 30, 20)                                            # Number of measurements
 methods <- c("full", "marker", "SI", "MI")                     # Missing data handling methods
 missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
-misstypes <- c("censor+", "censor-", "mvn+", "mvn-", "mcar")   # Missing data mechanism
+misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
 
 ### Generate all possible combinations of simulation conditions
 
@@ -64,7 +64,7 @@ for (i in 1:length(designs))
               {
                 for(p in 1: length(misstypes))
                 {
-                  if((models[j] == "mvn") || (misstypes[p] %in% c("censor+", "censor-")))
+                  if((models[j] == "mvn") || (misstypes[p] %in% c("trunc+", "trunc-")))
                   {
                     outlist <- data.frame(
                       design = designs[i], 
