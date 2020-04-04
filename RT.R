@@ -4,7 +4,6 @@
 #########################
 
 library(imputeTS)
-library(VIM)
 library(data.table)
 library(mice)
 library(Rcpp)
@@ -72,34 +71,9 @@ ESM_calc <- function(ESM, scores.a, scores.b, method, direction)
   return(stat)
 }
 
-### Impute missing data using single imputation method
-### Return data with missing data in place if model fitting fails
+### Add leading and lagging vectors as covariates for univariate data
 
-SI_handler <- function(data, model)
-{
-  if(model == "mvn")
-  {
-    colnames(data) <- c("Labs", "Vals", "Cov1", "Cov2")
-    data <- regressionImp(Vals ~ Cov1 + Cov2, data)
-    data <- data[,1:4]
-  } else
-  {
-    data[, 2] <- tryCatch(
-      na_kalman(data[, 2], model = "auto.arima", smooth = TRUE), 
-      error = function(e) { 
-        print("ARIMA failed!")
-        print(e)
-        return(data[, 2])
-      }
-    )
-  }
-  
-  return(data)
-}
-
-### Generate multiple imputations from dataset
-
-MI_handler <- function(data, nMI, model)
+Add_covariates <- function(data, model)
 {
   if(model != "mvn")
   {
@@ -108,7 +82,27 @@ MI_handler <- function(data, nMI, model)
     data["Lag"] <- shift(data[,2], type = "lag")
   }
   
+  return(data)
+}
+
+### Impute missing data using single imputation method
+
+SI_handler <- function(data, model)
+{
+  data <- Add_covariates(data, model)
+  mi <- mice(data[,2:4], m = 1, method = "norm.predict", remove_collinear = FALSE, printFlag = FALSE)
+  
+  data[,2:4] <- complete(mi, 1)
+  return(data)
+}
+
+### Generate multiple imputations from dataset
+
+MI_handler <- function(data, nMI, model)
+{
+  data <- Add_covariates(data, model)
   data <- data[,2:4]
+  
   mi <- mice(data, m = nMI, method = "norm", remove_collinear = FALSE, printFlag = FALSE)
   return(mi)
 }
