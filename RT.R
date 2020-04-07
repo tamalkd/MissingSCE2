@@ -85,17 +85,6 @@ Add_covariates <- function(data, model)
   return(data)
 }
 
-### Impute missing data using single imputation method
-
-# SI_handler <- function(data, model)
-# {
-#   data <- Add_covariates(data, model)
-#   mi <- mice(data[,2:4], m = 1, method = "norm.predict", remove_collinear = FALSE, printFlag = FALSE)
-#   
-#   data[,2:4] <- complete(mi, 1)
-#   return(data)
-# }
-
 ### Generate multiple imputations from dataset
 
 MI_handler <- function(data, nMI, model)
@@ -123,13 +112,6 @@ Compute_RT <- function(
   ABAB_idx     # Phase change indices for all possible ABAB randomizations
 )
 { 
-  ### Impute missing data using single imputation method
-  
-  # if(method == "SI")
-  # {
-  #   data <- SI_handler(data, model) 
-  # }
-  
   ### Randomization test for RBD
   
   if (design == "RBD") 
