@@ -3,10 +3,10 @@
 # For running the simulations on a personal computer, please refer to 'test.R'.
 #########################
 
-library(imputeTS)
 library(data.table)
 library(mice)
 library(Rcpp)
+
 sourceCpp("NAP.cpp")
 setDTthreads(1)
 
@@ -14,7 +14,7 @@ setDTthreads(1)
 
 mean_diff <- function(scores.a, scores.b, method, direction)
 {
-  if(method == "marker" || method == "SI")
+  if(method == "marker")
   {
     scores.a <- as.vector(na.omit(scores.a))
     scores.b <- as.vector(na.omit(scores.b))
@@ -31,7 +31,7 @@ mean_diff <- function(scores.a, scores.b, method, direction)
 
 NAP_calculation <- function(scores.a, scores.b, method, direction)
 {
-  if(method == "marker" || method == "SI")
+  if(method == "marker")
   {
     scores.a <- as.vector(na.omit(scores.a))
     scores.b <- as.vector(na.omit(scores.b))
@@ -75,7 +75,7 @@ ESM_calc <- function(ESM, scores.a, scores.b, method, direction)
 
 Add_covariates <- function(data, model)
 {
-  if(model != "mvn")
+  if(!(model %in% c("mvn.3", "mvn.6")))
   {
     data <- data[,1:2]
     data["Lead"] <- shift(data[,2], type = "lead")
@@ -87,14 +87,14 @@ Add_covariates <- function(data, model)
 
 ### Impute missing data using single imputation method
 
-SI_handler <- function(data, model)
-{
-  data <- Add_covariates(data, model)
-  mi <- mice(data[,2:4], m = 1, method = "norm.predict", remove_collinear = FALSE, printFlag = FALSE)
-  
-  data[,2:4] <- complete(mi, 1)
-  return(data)
-}
+# SI_handler <- function(data, model)
+# {
+#   data <- Add_covariates(data, model)
+#   mi <- mice(data[,2:4], m = 1, method = "norm.predict", remove_collinear = FALSE, printFlag = FALSE)
+#   
+#   data[,2:4] <- complete(mi, 1)
+#   return(data)
+# }
 
 ### Generate multiple imputations from dataset
 
@@ -125,10 +125,10 @@ Compute_RT <- function(
 { 
   ### Impute missing data using single imputation method
   
-  if(method == "SI")
-  {
-    data <- SI_handler(data, model) 
-  }
+  # if(method == "SI")
+  # {
+  #   data <- SI_handler(data, model) 
+  # }
   
   ### Randomization test for RBD
   

@@ -7,11 +7,11 @@
 ### All simulation conditions
 
 designs <- c("RBD", "ABAB")                                    # SCE design types
-models <- c("AR1", "normal", "uniform", "mvn")                 # Data models
+models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")      # Data models
 ESMs <- c("MD", "NAP")                                         # Test statistics
 ESs <- c(0, 1, 2)                                              # Effect sizes
 Ns <- c(40, 30, 20)                                            # Number of measurements
-methods <- c("full", "marker", "SI", "MI")                     # Missing data handling methods
+methods <- c("full", "marker", "MI")                           # Missing data handling methods
 missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
 misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
 
@@ -30,8 +30,6 @@ Result_table <- data.frame(
   misstype = character(),
   stringsAsFactors = FALSE
 )
-
-print(Sys.time())
 
 for (i in 1:length(designs))
 {
@@ -64,7 +62,7 @@ for (i in 1:length(designs))
               {
                 for(p in 1: length(misstypes))
                 {
-                  if((models[j] == "mvn") || (misstypes[p] %in% c("trunc+", "trunc-")))
+                  if((models[j] %in% c("mvn.3", "mvn.6")) || (misstypes[p] %in% c("trunc+", "trunc-")))
                   {
                     outlist <- data.frame(
                       design = designs[i], 

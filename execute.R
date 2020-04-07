@@ -24,7 +24,6 @@ options(warn=-1)
 
 alfa = 0.05                 # Level of significance
 AR = 0.6                    # Autocorrelation
-corr = 0.6                  # Correlation between bivariate normal vectors
 direction = "+"             # Direction of test statistic (Only used if test statistic is one-sided)
 limit_phase = 3             # Minimum number of measurements in a phase
 nCP = 1                     # Number of assignments per simulated dataset (>1 only if calcualting conditional power)
@@ -55,7 +54,6 @@ for(it in 1:replications)
     misstype = misstype,
     alfa = alfa,
     AR = AR,
-    corr = corr,
     direction = direction,
     limit_phase = limit_phase,
     nCP = nCP,

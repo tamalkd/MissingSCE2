@@ -13,7 +13,9 @@ Generate_data <- function(model, N, AR)
     "normal" = rnorm(n = N, mean = 0, sd = 1),
     "uniform" = runif(n = N, min = 0, max = sqrt(12)),
     "AR1" = arima.sim(model = list(ar = AR), n = N),
-    "mvn" = matrix(rnorm(n = 3 * N, mean = 0, sd = 1), ncol = 3)
+    "mvn.3" = matrix(rnorm(n = 3 * N, mean = 0, sd = 1), ncol = 3),
+    "mvn.6" = matrix(rnorm(n = 3 * N, mean = 0, sd = 1), ncol = 3),
+    stop("Unknown model: Cannot generate data!")
   )
   
   data_sim <- as.data.frame(data_sim)
@@ -46,8 +48,14 @@ Add_missing <- function(data, N, missprop, misstype)
 
 ### Adjust correlations of observed data and covariates for mvn
 
-Adjust_mvn_corr <- function(data, corr)
+Adjust_mvn_corr <- function(data, model)
 {
+  corr = switch(model,
+    "mvn.3" = 0.3,
+    "mvn.6" = 0.6,
+    stop("Unknown model: Cannot calculate correlation!")
+  )
+  
   norm <- data[, 1]
   norm <- (norm - mean(norm)) / sd(norm)
   coef <- corr / sqrt(1 - (corr ^ 2))
@@ -82,7 +90,6 @@ Calculate_power_RT <- function(
   misstype = "",   # Missing data mechanism
   alfa,            # Level of significance
   AR,              # Autocorrelation
-  corr,            # Correlation between bivariate normal vectors
   direction = "+", # Direction of test statistic (Only used if randomization test is one-sided)
   limit_phase,     # Minimum number of measurements in a phase
   nCP,             # Number of randomizations per simulated dataset (>1 only if calcualting conditional power)
@@ -187,9 +194,9 @@ Calculate_power_RT <- function(
     
     ### Add missingness and create dataset
     
-    if(model == "mvn")
+    if(model %in% c("mvn.3", "mvn.6"))
     {
-      data_shift <- Adjust_mvn_corr(data = data_shift, corr = corr)
+      data_shift <- Adjust_mvn_corr(data = data_shift, model = model)
     }
     if(method != "full")
     {
@@ -205,6 +212,7 @@ Calculate_power_RT <- function(
       
       count_rejections[i] <- 0
       pvalues[i] <- NA
+      
       #print("missing statistic!")
     } else
     {

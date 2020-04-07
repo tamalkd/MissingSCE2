@@ -18,28 +18,28 @@
 # 'RT.R' 'power_calc.R' 'NAP.cpp'
 #
 # Please ensure the following R packages are installed:
-# 'foreach', 'parallel', 'doParallel', 'MASS', 'imputeTS', 'VIM', 'data.table', 'mice', 'Rcpp' 
+# 'foreach', 'parallel', 'doParallel', 'data.table', 'mice', 'Rcpp' 
 #####################
 
 ### All simulation conditions (for reference)
 
 # designs <- c("RBD", "ABAB")                                    # SCE design types
-# models <- c("AR1", "normal", "uniform", "mvn")                 # Data models
+# models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")      # Data models
 # ESMs <- c("MD", "NAP")                                         # Test statistics
 # ESs <- c(0, 1, 2)                                              # Effect sizes
 # Ns <- c(40, 30, 20)                                            # Number of measurements
-# methods <- c("full", "marker", "SI", "MI")                     # Missing data handling methods
-# missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data 
+# methods <- c("full", "marker", "MI")                           # Missing data handling methods
+# missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
 # misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
 
 ### Simulation conditions to test
 
 designs <- c("RBD", "ABAB")                                    # SCE design types
-models <- c("AR1", "normal", "uniform", "mvn")                 # Data models
+models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")      # Data models
 ESMs <- c("MD", "NAP")                                         # Test statistics
 ESs <- c(0, 1, 2)                                              # Effect sizes
 Ns <- c(40, 30, 20)                                            # Number of measurements
-methods <- c("full", "marker", "SI", "MI")                     # Missing data handling methods
+methods <- c("full", "marker", "MI")                           # Missing data handling methods
 missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
 misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
 
@@ -47,7 +47,6 @@ misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data me
 
 alfa = 0.05                 # Level of significance
 AR = 0.6                    # Autocorrelation
-corr = 0.6                  # Correlation between bivariate normal vectors
 direction = "+"             # Direction of test statistic (Only used if test statistic is one-sided)
 limit_phase = 3             # Minimum number of measurements in a phase
 nCP = 1                     # Number of assignments per simulated dataset (>1 only if calcualting conditional power)
@@ -121,7 +120,7 @@ for (i in 1:length(designs))
               {
                 for(p in 1: length(misstypes))
                 {
-                  if((models[j] == "mvn") || (misstypes[p] %in% c("trunc+", "trunc-")))
+                  if((models[j] %in% c("mvn.3", "mvn.6")) || (misstypes[p] %in% c("trunc+", "trunc-")))
                   {
                     outlist <- data.frame(
                       design = designs[i], 
@@ -169,7 +168,7 @@ for(rnum in 1:nrow(Result_table))
   #   it = 1:replications,
   #   .inorder = FALSE,
   #   .combine = 'c',
-  #   .packages = c("MASS", "Rcpp", "data.table", "imputeTS", 'VIM', "mice"),
+  #   .packages = c("Rcpp", "data.table", "mice"),
   #   .noexport = c("NAP_cpp")
   # ) %dopar%
   # {
@@ -186,7 +185,6 @@ for(rnum in 1:nrow(Result_table))
   #     misstype = row$misstype,
   #     alfa = alfa,
   #     AR = AR,
-  #     corr = corr,
   #     direction = direction,
   #     limit_phase = limit_phase,
   #     nCP = nCP,
@@ -215,7 +213,6 @@ for(rnum in 1:nrow(Result_table))
       misstype = row$misstype,
       alfa = alfa,
       AR = AR,
-      corr = corr,
       direction = direction,
       limit_phase = limit_phase,
       nCP = nCP,
