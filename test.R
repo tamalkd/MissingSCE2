@@ -2,23 +2,27 @@
 # PLEASE READ CAREFULLY BEFORE EXECUTING!
 #
 # This code would normally be run on supercomputers. The entirety of the computation is expected to take 
-# 20000 hours on a single core processor running at 2.5 GHz. 
+# 3000 hours on a single core processor running at 2.5 GHz. 
 #
 # Please only run one condition at a time if running on a personal computer. This means only one choice 
 # among 'designs' (single-case design), 'models' (simulation data model), 'ESMs' (effect size 
 # measure/test statistic), 'ESs' (effect size applied), 'Ns' (number of measurements), 'methods' (missing 
-# data handling method), and 'missprops' (missing data proportion) should be kept, all others should to 
-# be deleted.
+# data handling method), 'missprops' (missing data proportion), and 'misstypes' (missing data mechanism) 
+# should be kept, all others should be deleted.
 #
 # We strongly recommend setting parameter 'replications' (number of simulated datasets) to 1000 or lower.
 # This would lead to lower accuracy for power/type I error estimate, however otherwise the computation 
 # time would be too long.
 #
 # PLease ensure the following files are in the same folder (or in the working directory):
-# 'RT.R' 'power_calc.R' 'NAP.cpp'
+# 'RT.R' 'power.R' 'NAP.cpp'
 #
 # Please ensure the following R packages are installed:
-# 'foreach', 'parallel', 'doParallel', 'data.table', 'mice', 'Rcpp' 
+# 'data.table', 'mice', 'Rcpp' 
+#
+# If using parallel computation using 'foreach' package, please ensure that thefollowing packages 
+# are installed:
+# 'foreach', 'parallel', 'doParallel'
 #####################
 
 ### All simulation conditions (for reference)
@@ -58,12 +62,12 @@ replications = 1000         # Number of simulated datasets
 
 library(Rcpp)
 
-library(foreach)
-library(parallel)
-library(doParallel)
-
-cores <- detectCores()
-print(cores)
+# library(foreach)
+# library(parallel)
+# library(doParallel)
+# 
+# cores <- detectCores()
+# print(cores)
 
 source("RT.R")
 source("power.R")
