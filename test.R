@@ -202,7 +202,7 @@ for(rnum in 1:nrow(Result_table))
   ### Run without parallelization
   
   set.seed(1000)  # Set random seed to make results exactly reproducible (doesn't work with foreach)
-  output <- numeric()
+  output <- numeric(replications)
 
   for(it in 1:replications)
   {

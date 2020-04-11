@@ -181,8 +181,8 @@ Calculate_power_RT <- function(
   
   ### Calculate p-value and whether H0 is rejected for simulated dataset
   
-  count_rejections <- numeric()
-  pvalues <- numeric()
+  count_rejections <- numeric(nCP)
+  pvalues <- numeric(nCP)
   
   for(i in 1:nCP)
   {

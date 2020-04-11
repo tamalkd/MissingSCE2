@@ -40,7 +40,7 @@ source("power.R")
 
 set.seed(1000)  # Set random seed to make results exactly reproducible
 
-output <- numeric()
+output <- numeric(replications)
 for(it in 1:replications)
 {
   output[it] <- Calculate_power_RT(
