@@ -5,6 +5,34 @@
 
 source("RT.R")
 
+### Generate unique seed for every set of simulation conditions
+
+Generate_seed <- function(design, model, ESM, ES, N, method, missprop, misstype)
+{
+  designs <- c("RBD", "ABAB")
+  models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")
+  ESMs <- c("MD", "NAP")
+  ESs <- c(0, 1, 2)
+  Ns <- c(20, 30, 40)
+  methods <- c("full", "marker", "MI")
+  missprops <- c(0, 0.1, 0.3, 0.5)
+  misstypes <- c("none", "trunc+", "trunc-", "mvn+", "mvn-", "mcar")
+  
+  idx_design <- match(design, designs)
+  idx_model <- match(model, models)
+  idx_ESM <- match(ESM, ESMs)
+  idx_ES <- match(ES, ESs)
+  idx_N <- match(N, Ns)
+  idx_method <- match(method, methods)
+  idx_missprop <- match(missprop, missprops)
+  idx_misstype <- match(misstype, misstypes)
+  
+  seed <- idx_design + idx_model * 10 + idx_ESM * 100 + idx_ES * 1e3 + 
+    idx_N * 1e4 + idx_method * 1e5 + idx_missprop * 1e6 + idx_misstype * 1e7
+  
+  return(seed)
+}
+
 ### Generate simulation data
 
 Generate_data <- function(model, N, AR) 

@@ -38,7 +38,18 @@ strt <- Sys.time()
 source("RT.R")
 source("power.R")
 
-set.seed(1000)  # Set random seed to make results exactly reproducible
+seed <- Generate_seed(
+  design = design,
+  model = model,
+  ESM = ESM,
+  ES = ES,
+  N = N,
+  method = method,
+  missprop = missprop,
+  misstype = misstype
+)
+
+set.seed(seed)  # Set unique seed to make results exactly reproducible
 
 output <- numeric(replications)
 for(it in 1:replications)

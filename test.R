@@ -201,7 +201,18 @@ for(rnum in 1:nrow(Result_table))
   
   ### Run without parallelization
   
-  set.seed(1000)  # Set random seed to make results exactly reproducible (doesn't work with foreach)
+  seed <- Generate_seed(
+    design = row$design,
+    model = row$model,
+    ESM = row$ESM,
+    ES = row$ES,
+    N = row$N,
+    method = row$method,
+    missprop = row$missprop,
+    misstype = row$misstype
+  )
+  
+  set.seed(seed)  # Set unique seed to make results exactly reproducible (doesn't work with foreach)
   output <- numeric(replications)
 
   for(it in 1:replications)
