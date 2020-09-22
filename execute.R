@@ -22,14 +22,14 @@ options(warn=-1)
 
 ### Other parameters
 
-alfa = 0.05                 # Level of significance
-AR = 0.6                    # Autocorrelation
-direction = "+"             # Direction of test statistic (Only used if test statistic is one-sided)
-limit_phase = 3             # Minimum number of measurements in a phase
-nCP = 1                     # Number of assignments per simulated dataset (>1 only if calcualting conditional power)
-nMC = 1000                  # Number of randomizations in Monte Carlo randomization test
-nMI = 10                    # Number of imputations in multiple imputation
-replications = 10000        # Number of simulated datasets
+alfa <- 0.05                 # Level of significance
+AR <- 0.6                    # Autocorrelation
+direction <- "+"             # Direction of test statistic (Only used if test statistic is one-sided)
+limit_phase <- 3             # Minimum number of measurements in a phase
+nCP <- 1                     # Number of assignments per simulated dataset (>1 only if calculating conditional power)
+nMC <- 1000                  # Number of randomizations in Monte Carlo randomization test
+nMI <- 10                    # Number of imputations in multiple imputation
+replications <- 10000        # Number of simulated datasets
 
 ### Run simulation
 

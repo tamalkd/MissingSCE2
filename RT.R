@@ -116,7 +116,7 @@ Compute_RT <- function(
   
   if (design == "RBD") 
   { 
-    ### Calulate observed test statistic
+    ### Calculate observed test statistic
     
     if(method == "MI")
     {
@@ -144,7 +144,7 @@ Compute_RT <- function(
       
     } else
     {
-      ### Calulate observed test statistic for complete data, randomized marker method, or single imputation method
+      ### Calculate observed test statistic for complete data, randomized marker method, or single imputation method
       
       observed.a <- data[, 2][data[, 1] == "A"]
       observed.b <- data[, 2][data[, 1] == "B"]
