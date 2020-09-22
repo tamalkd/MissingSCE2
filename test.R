@@ -236,6 +236,8 @@ for(rnum in 1:nrow(Result_table))
     )
   }
   
+  ### Collate results
+  
   power <- mean(output)
   end <- Sys.time()
   timer <- as.numeric(difftime(end, start, units = "secs"))

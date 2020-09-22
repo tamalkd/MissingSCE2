@@ -195,7 +195,7 @@ Compute_RT <- function(
         
       } else
       {
-        ### Calulate statistic for complete data, randomized marker method, or single imputation method
+        ### Calculate statistic for complete data, randomized marker method, or single imputation method
         
         ascores <- observed[assignment == "A"] 
         bscores <- observed[assignment == "B"]
@@ -213,7 +213,7 @@ Compute_RT <- function(
   
   if(design == "ABAB")
   {
-    ### Calulate observed test statistic
+    ### Calculate observed test statistic
     
     if(method == "MI")
     {
@@ -241,7 +241,7 @@ Compute_RT <- function(
       
     } else
     {
-      ### Calulate observed test statistic for complete data, randomized marker method, or single imputation method
+      ### Calculate observed test statistic for complete data, randomized marker method, or single imputation method
       
       observed.a <- data[, 2][data[, 1] == "A"]
       observed.b <- data[, 2][data[, 1] == "B"]
@@ -327,7 +327,7 @@ Compute_RT <- function(
         
       } else
       {
-        ### Calulate statistic for complete data, randomized marker method, or single imputation method
+        ### Calculate statistic for complete data, randomized marker method, or single imputation method
         
         ascores <- c(observed[1:(index.a1[selection[it]])], observed[(1+index.b1[selection[it]]):index.a2[selection[it]]])
         bscores <- c(observed[(1+index.a1[selection[it]]):index.b1[selection[it]]], observed[(1+index.a2[selection[it]]):MT])
