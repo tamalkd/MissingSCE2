@@ -54,7 +54,7 @@ Generate_data <- function(model, N, AR)
 
 Add_missing <- function(data, N, missprop, misstype)
 {
-  if(misstype %in% c("trunc+", "trunc-", "mvn+", "mvn-"))
+  if(misstype %in% c("trunc+", "trunc-", "mvn+", "mvn-")) # MNAR and MAR mechanisms
   {
     top_trunc <- (misstype %in% c("trunc+", "mvn+"))
     col <- if(misstype %in% c("mvn+", "mvn-")) 2 else 1
@@ -65,7 +65,7 @@ Add_missing <- function(data, N, missprop, misstype)
     
     data[miss, 1] <- NA
   } else
-  if(misstype == "mcar")
+  if(misstype == "mcar") # MCAR mechanism
   {
     miss <- sample(N, missprop * N)
     data[miss, 1] <- NA
@@ -74,7 +74,7 @@ Add_missing <- function(data, N, missprop, misstype)
   return(data)
 }
 
-### Adjust correlations of observed data and covariates for mvn
+### Adjust correlations of observed data and covariates for multivariate normal models
 
 Adjust_mvn_corr <- function(data, model)
 {

@@ -23,6 +23,23 @@
 # If using parallel computation using 'foreach' package, please ensure that the following packages 
 # are installed:
 # 'foreach', 'parallel', 'doParallel'
+#
+# Missing data mechanisms:
+# Missing completely at random (MCAR): 'mcar'
+# Missing at random (MAR): 'mvn+', 'mvn-'
+# Missing not at random (MNAR): 'trunc+', 'trunc-'
+#
+# Data models:
+# Standard normal model: 'normal'
+# Uniform model: 'uniform'
+# Autoregressive model: 'AR1'
+# Multivariate normal model with correlation 0.3: 'mvn.3'
+# Multivariate normal model with correlation 0.6: 'mvn.6'
+#
+# Missing data handling methods:
+# Randomized marker method: 'marker'
+# Multiple imputation: 'MI'
+# Complete data (no need for missing data handling): 'full'
 #####################
 
 ### All simulation conditions (for reference)
@@ -165,7 +182,7 @@ for(rnum in 1:nrow(Result_table))
   
   ### Run parallel
   
-  # cl <- makeCluster(max(cores - 3, 1))
+  # cl <- makeCluster(max(cores - 2, 1))
   # registerDoParallel(cl)
   # 
   # output <- foreach(
