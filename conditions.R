@@ -6,14 +6,14 @@
 
 ### All simulation conditions
 
-designs <- c("RBD", "ABAB")                                    # SCE design types
-models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")      # Data models
-ESMs <- c("MD", "NAP")                                         # Test statistics
-ESs <- c(0, 1, 2)                                              # Effect sizes
-Ns <- c(40, 30, 20)                                            # Number of measurements
-methods <- c("full", "marker", "MI")                           # Missing data handling methods
-missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
-misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
+designs <- c("RBD", "ABAB", "MBD")                                    # SCE design types
+models <- c("AR.3", "AR.6", "normal", "uniform", "mvn.3", "mvn.6")    # Data models
+ESMs <- c("MD", "NAP")                                                # Test statistics
+ESs <- c(0, 1, 2)                                                     # Effect sizes
+Ns <- c(40, 30, 20)                                                   # Number of measurements
+methods <- c("full", "marker", "MI")                                  # Missing data handling methods
+missprops <- c(0.1, 0.3, 0.5)                                         # Proportion of missing data
+misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")            # Missing data mechanism
 
 ### Generate all possible combinations of simulation conditions
 

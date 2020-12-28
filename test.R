@@ -18,7 +18,7 @@
 # 'RT.R' 'power.R' 'NAP.cpp'
 #
 # Please ensure the following R packages are installed:
-# 'data.table', 'mice', 'Rcpp' 
+# 'mice', 'Rcpp' 
 #
 # If using parallel computation using 'foreach' package, please ensure that the following packages 
 # are installed:
@@ -32,7 +32,8 @@
 # Data models:
 # Standard normal model: 'normal'
 # Uniform model: 'uniform'
-# Autoregressive model: 'AR1'
+# Autoregressive model with autocorrelation 0.3: 'AR.3'
+# Autoregressive model with autocorrelation 0.6: 'AR.6'
 # Multivariate normal model with correlation 0.3: 'mvn.3'
 # Multivariate normal model with correlation 0.6: 'mvn.6'
 #
@@ -44,36 +45,36 @@
 
 ### All simulation conditions (for reference)
 
-# designs <- c("RBD", "ABAB")                                    # SCE design types
-# models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")      # Data models
-# ESMs <- c("MD", "NAP")                                         # Test statistics
-# ESs <- c(0, 1, 2)                                              # Effect sizes
-# Ns <- c(40, 30, 20)                                            # Number of measurements
-# methods <- c("full", "marker", "MI")                           # Missing data handling methods
-# missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
-# misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
+# designs <- c("RBD", "ABAB", "MBD")                                    # SCE design types
+# models <- c("AR.3", "AR.6", "normal", "uniform", "mvn.3", "mvn.6")    # Data models
+# ESMs <- c("MD", "NAP")                                                # Test statistics
+# ESs <- c(0, 1, 2)                                                     # Effect sizes
+# Ns <- c(40, 30, 20)                                                   # Number of measurements
+# methods <- c("full", "marker", "MI")                                  # Missing data handling methods
+# missprops <- c(0.1, 0.3, 0.5)                                         # Proportion of missing data
+# misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")            # Missing data mechanism
 
 ### Simulation conditions to test
 
-designs <- c("RBD", "ABAB")                                    # SCE design types
-models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")      # Data models
-ESMs <- c("MD", "NAP")                                         # Test statistics
-ESs <- c(0, 1, 2)                                              # Effect sizes
-Ns <- c(40, 30, 20)                                            # Number of measurements
-methods <- c("full", "marker", "MI")                           # Missing data handling methods
-missprops <- c(0.1, 0.3, 0.5)                                  # Proportion of missing data
-misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")     # Missing data mechanism
+designs <- c("RBD", "ABAB", "MBD")                                    # SCE design types
+models <- c("AR.3", "AR.6", "normal", "uniform", "mvn.3", "mvn.6")    # Data models
+ESMs <- c("MD", "NAP")                                                # Test statistics
+ESs <- c(0, 1, 2)                                                     # Effect sizes
+Ns <- c(40, 30, 20)                                                   # Number of measurements
+methods <- c("full", "marker", "MI")                                  # Missing data handling methods
+missprops <- c(0.1, 0.3, 0.5)                                         # Proportion of missing data
+misstypes <- c("trunc+", "trunc-", "mvn+", "mvn-", "mcar")            # Missing data mechanism
 
 ### Other parameters
 
-alfa <- 0.05                 # Level of significance
-AR <- 0.6                    # Autocorrelation
-direction <- "+"             # Direction of test statistic (Only used if test statistic is one-sided)
-limit_phase <- 3             # Minimum number of measurements in a phase
-nCP <- 1                     # Number of assignments per simulated dataset (>1 only if calculating conditional power)
-nMC <- 1000                  # Number of randomizations in Monte Carlo randomization test
-nMI <- 10                    # Number of imputations in multiple imputation
-replications <- 1000         # Number of simulated datasets
+alfa <- 0.05          # Level of significance
+direction <- "+"      # Direction of test statistic (Only used if test statistic is one-sided)
+limit_phase <- 3      # Minimum number of measurements in a phase
+nCP <- 1              # Number of assignments per simulated dataset (>1 only if calculating conditional power)
+nMBD <- 4             # Number of participants in MBD
+nMC <- 1000           # Number of randomizations in Monte Carlo randomization test
+nMI <- 10             # Number of imputations in multiple imputation
+replications <- 1000  # Number of simulated datasets
 
 ### Run simulations
 
@@ -205,10 +206,10 @@ for(rnum in 1:nrow(Result_table))
   #     missprop = row$missprop,
   #     misstype = row$misstype,
   #     alfa = alfa,
-  #     AR = AR,
   #     direction = direction,
   #     limit_phase = limit_phase,
   #     nCP = nCP,
+  #     nMBD = nMBD,
   #     nMC = nMC,
   #     nMI = nMI
   #   )
@@ -244,10 +245,10 @@ for(rnum in 1:nrow(Result_table))
       missprop = row$missprop,
       misstype = row$misstype,
       alfa = alfa,
-      AR = AR,
       direction = direction,
       limit_phase = limit_phase,
       nCP = nCP,
+      nMBD = nMBD,
       nMC = nMC,
       nMI = nMI
     )

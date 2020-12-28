@@ -9,8 +9,8 @@ source("RT.R")
 
 Generate_seed <- function(design, model, ESM, ES, N, method, missprop, misstype)
 {
-  designs <- c("RBD", "ABAB")
-  models <- c("AR1", "normal", "uniform", "mvn.3", "mvn.6")
+  designs <- c("RBD", "ABAB", "MBD")
+  models <- c("AR.6", "normal", "uniform", "mvn.3", "mvn.6", "AR.3")
   ESMs <- c("MD", "NAP")
   ESs <- c(0, 1, 2)
   Ns <- c(20, 30, 40)
@@ -35,12 +35,13 @@ Generate_seed <- function(design, model, ESM, ES, N, method, missprop, misstype)
 
 ### Generate simulation data
 
-Generate_data <- function(model, N, AR) 
+Generate_data <- function(model, N) 
 {
   data_sim <- switch(model,
     "normal" = rnorm(n = N, mean = 0, sd = 1),
     "uniform" = runif(n = N, min = 0, max = sqrt(12)),
-    "AR1" = arima.sim(model = list(ar = AR), n = N),
+    "AR.3" = arima.sim(model = list(ar = 0.3), n = N),
+    "AR.6" = arima.sim(model = list(ar = 0.6), n = N),
     "mvn.3" = matrix(rnorm(n = 3 * N, mean = 0, sd = 1), ncol = 3),
     "mvn.6" = matrix(rnorm(n = 3 * N, mean = 0, sd = 1), ncol = 3),
     stop("Unknown model: Cannot generate data!")
@@ -96,13 +97,19 @@ Adjust_mvn_corr <- function(data, model)
 
 ### Check if data for any treatment level is completely missing
 
-Check_data_insufficient <- function(data_input)
+Check_data_insufficient <- function(data_list, nReps)
 {
-  check <- !is.na(data_input[, 2])
-  check.a <- check[data_input[, 1] == "A"]
-  check.b <- check[data_input[, 1] == "B"]
-  checkall <- sum(check.a) * sum(check.b)
-  return(checkall == 0)
+  checkall <- numeric(nReps)
+  for(i in 1:nReps)
+  {
+    data_input <- data_list[[i]]
+    check <- !is.na(data_input[, 2])
+    check.a <- check[data_input[, 1] == "A"]
+    check.b <- check[data_input[, 1] == "B"]
+    checkall[i] <- sum(check.a) * sum(check.b)
+  }
+  
+  return(sum(checkall) == 0)
 }
 
 ### Estimate power and type I error rate
@@ -117,17 +124,17 @@ Calculate_power_RT <- function(
   missprop = 0,    # Proportion of missing data 
   misstype = "",   # Missing data mechanism
   alfa,            # Level of significance
-  AR,              # Autocorrelation
   direction = "+", # Direction of test statistic (Only used if randomization test is one-sided)
   limit_phase,     # Minimum number of measurements in a phase
-  nCP,             # Number of randomizations per simulated dataset (>1 only if calcualting conditional power)
+  nCP,             # Number of randomizations per simulated dataset (>1 only if calculating conditional power)
+  nMBD,            # Number of participants in MBD
   nMC,             # Number of randomizations in Monte Carlo randomization test
   nMI              # Number of imputations in multiple imputation
 )
 {
   ### Define matrices for assignments
   
-  assignments <- matrix(nrow = nCP, ncol = N)
+  assignments <- list()
   ABAB_idx <- matrix()
   
   ### Randomly select randomization for RBD
@@ -147,7 +154,7 @@ Calculate_power_RT <- function(
         index <- if(rand[j] < 0.5) ab else ba
         assignment[(j*2-1):(j*2)] <- index
       }
-      assignments[i,] <- assignment
+      assignments[[i]] <- matrix(assignment, ncol = 1)
     }
   }
   
@@ -192,11 +199,14 @@ Calculate_power_RT <- function(
     
     for(it in 1:nCP)
     {
-      assignments[it, ] <- c(
-        rep("A", index.a1[selection[it]]),
-        rep("B", index.b1[selection[it]] - index.a1[selection[it]]),
-        rep("A", index.a2[selection[it]] - index.b1[selection[it]]),
-        rep("B", N - index.a2[selection[it]])
+      assignments[[it]] <- matrix(
+        c(
+          rep("A", index.a1[selection[it]]),
+          rep("B", index.b1[selection[it]] - index.a1[selection[it]]),
+          rep("A", index.a2[selection[it]] - index.b1[selection[it]]),
+          rep("B", N - index.a2[selection[it]])
+        ), 
+        ncol = 1
       )
     }
     
@@ -204,8 +214,34 @@ Calculate_power_RT <- function(
     ABAB_idx <- matrix(c(index.a1, index.b1, index.a2), ncol = 3, byrow = FALSE)
   }
   
+  ### Randomly select randomization for MBD
+  
+  if(design == "MBD")
+  {
+    startpoints <- (limit_phase + 1):(N - limit_phase + 1)
+    asgn_matrix <- matrix(nrow = N, ncol = nMBD)
+    
+    for(i in 1:nCP)
+    {
+      combstartpts <- sample(startpoints, nMBD)
+      for(j in 1:nMBD)
+      {
+        asgn_matrix[,j] <- c(rep("A", combstartpts[j] - 1), rep("B", N - combstartpts[j] + 1))
+      }
+      
+      assignments[[i]] <- asgn_matrix
+    }
+  }
+  
   ### Simulate dataset
-  data_obs <- Generate_data(model = model, N = N, AR = AR)
+  
+  nReps <- if(design == "MBD") nMBD else 1
+  data_obs <- list()
+  
+  for(i in 1:nReps)
+  {
+    data_obs[[i]] <- Generate_data(model = model, N = N)
+  }
   
   ### Calculate p-value and whether H0 is rejected for simulated dataset
   
@@ -214,27 +250,33 @@ Calculate_power_RT <- function(
   
   for(i in 1:nCP)
   {
-    ### Add effect size
+    labels <- assignments[[i]] 
+    data_list <- list()
     
-    labels <- assignments[i,] 
-    data_shift <- data_obs
-    data_shift[labels == "B", 1] <- data_shift[labels == "B", 1] + ES
-    
-    ### Add missingness and create dataset
-    
-    if(model %in% c("mvn.3", "mvn.6"))
+    for(j in 1:nReps)
     {
-      data_shift <- Adjust_mvn_corr(data = data_shift, model = model)
+      ### Add effect size
+      
+      label_col <- labels[,j]
+      data_shift <- data_obs[[j]]
+      data_shift[label_col == "B", 1] <- data_shift[label_col == "B", 1] + ES
+      
+      ### Add missingness and create dataset
+      
+      if(model %in% c("mvn.3", "mvn.6"))
+      {
+        data_shift <- Adjust_mvn_corr(data = data_shift, model = model)
+      }
+      if(method != "full")
+      {
+        data_shift <- Add_missing(data = data_shift, N = N, missprop = missprop, misstype = misstype)
+      }
+      data_list[[j]] <- cbind(as.data.frame(label_col, stringsAsFactors = FALSE), data_shift)
     }
-    if(method != "full")
-    {
-      data_shift <- Add_missing(data = data_shift, N = N, missprop = missprop, misstype = misstype)
-    }
-    data_input <- cbind(as.data.frame(labels, stringsAsFactors = FALSE), data_shift)
     
     ### Calculate randomization test result
     
-    if(method != "full" && Check_data_insufficient(data_input = data_input))
+    if(method != "full" && Check_data_insufficient(data_list = data_list, nReps = nReps))
     {
       ### Reject H0 is data entirely missing for a treatment level
       
@@ -247,7 +289,7 @@ Calculate_power_RT <- function(
       ### Dispatch data to randomization test function
       
       output <- Compute_RT(
-        data = data_input, 
+        data_list = data_list, 
         design = design, 
         model = model,
         ESM = ESM, 
@@ -255,6 +297,7 @@ Calculate_power_RT <- function(
         alfa = alfa,
         direction = direction, 
         limit_phase = limit_phase,
+        nMBD = nMBD,
         nMC = nMC, 
         nMI = nMI,
         ABAB_idx = ABAB_idx

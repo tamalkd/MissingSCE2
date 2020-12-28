@@ -3,12 +3,10 @@
 # For running the simulations on a personal computer, please refer to 'test.R'.
 #########################
 
-library(data.table)
 library(mice)
 library(Rcpp)
 
 sourceCpp("NAP.cpp")
-setDTthreads(1)
 
 ### Calculate mean difference test statistic
 
@@ -78,8 +76,9 @@ Add_covariates <- function(data, model)
   if(!(model %in% c("mvn.3", "mvn.6")))
   {
     data <- data[,1:2]
-    data["Lead"] <- shift(data[,2], type = "lead")
-    data["Lag"] <- shift(data[,2], type = "lag")
+    nrw <- nrow(data)
+    data["Lead"] <- c(data[-1, 2], NA)
+    data["Lag"] <- c(NA, data[-nrw, 2])
   }
   
   return(data)
@@ -99,7 +98,7 @@ MI_handler <- function(data, nMI, model)
 ### Perform randomization test and calculate p-value
 
 Compute_RT <- function(
-  data,        # Simulated dataset
+  data_list,   # Simulated dataset(s)
   design,      # SCE design type
   model,       # Data model
   ESM,         # Test statistic
@@ -107,6 +106,7 @@ Compute_RT <- function(
   alfa,        # Level of significance
   direction,   # Direction of test statistic (Only used if randomization test is one-sided)
   limit_phase, # Minimum number of measurements in a phase
+  nMBD,        # Number of participants in MBD
   nMC,         # Number of randomizations in Monte Carlo randomization test
   nMI,         # Number of imputations in multiple imputation
   ABAB_idx     # Phase change indices for all possible ABAB randomizations
@@ -117,6 +117,8 @@ Compute_RT <- function(
   if (design == "RBD") 
   { 
     ### Calculate observed test statistic
+    
+    data <- data_list[[1]]
     
     if(method == "MI")
     {
@@ -144,7 +146,7 @@ Compute_RT <- function(
       
     } else
     {
-      ### Calculate observed test statistic for complete data, randomized marker method, or single imputation method
+      ### Calculate observed test statistic for complete data or randomized marker method
       
       observed.a <- data[, 2][data[, 1] == "A"]
       observed.b <- data[, 2][data[, 1] == "B"]
@@ -195,7 +197,7 @@ Compute_RT <- function(
         
       } else
       {
-        ### Calculate statistic for complete data, randomized marker method, or single imputation method
+        ### Calculate statistic for complete data or randomized marker method
         
         ascores <- observed[assignment == "A"] 
         bscores <- observed[assignment == "B"]
@@ -214,6 +216,8 @@ Compute_RT <- function(
   if(design == "ABAB")
   {
     ### Calculate observed test statistic
+    
+    data <- data_list[[1]]
     
     if(method == "MI")
     {
@@ -241,7 +245,7 @@ Compute_RT <- function(
       
     } else
     {
-      ### Calculate observed test statistic for complete data, randomized marker method, or single imputation method
+      ### Calculate observed test statistic for complete data or randomized marker method
       
       observed.a <- data[, 2][data[, 1] == "A"]
       observed.b <- data[, 2][data[, 1] == "B"]
@@ -327,13 +331,135 @@ Compute_RT <- function(
         
       } else
       {
-        ### Calculate statistic for complete data, randomized marker method, or single imputation method
+        ### Calculate statistic for complete data or randomized marker method
         
         ascores <- c(observed[1:(index.a1[selection[it]])], observed[(1+index.b1[selection[it]]):index.a2[selection[it]]])
         bscores <- c(observed[(1+index.a1[selection[it]]):index.b1[selection[it]]], observed[(1+index.a2[selection[it]]):MT])
         
         RD[it] <- ESM_calc(ESM = ESM, scores.a = ascores, scores.b = bscores, method = method, direction = direction)
       }
+    }
+    
+    ### Add observed statistic to Monte Carlo distribution
+    RD[nMC] <- ESM_obs
+  }
+  
+  ### Randomization test for MBD
+  
+  if(design == "MBD") 
+  { 
+    ### Calculate observed test statistic
+    
+    MT <- nrow(data_list[[1]])
+    diff <- numeric(nMBD)
+    imps <- numeric(nMI)
+    
+    if(method == "MI")
+    {
+      ### Impute data for each participant separately
+      
+      completes_list <- list()
+      
+      for(p in 1:nMBD)
+      {
+        data <- data_list[[p]]
+        
+        ### Generate multiple imputations
+        
+        mi <- MI_handler(data, nMI, model)
+        index.a <- data[, 1] == "A"
+        index.b <- data[, 1] == "B"
+        completes <- matrix(nrow = MT, ncol = nMI)
+        
+        ### Calculate average statistic from multiple imputations
+        
+        for(i in 1:nMI)
+        {
+          temp <- complete(mi, i)[,1]
+          observed.a <- temp[index.a]
+          observed.b <- temp[index.b]
+          completes[,i] <- temp
+          
+          imps[i] <- ESM_calc(ESM = ESM, scores.a = observed.a, scores.b = observed.b, method = method, direction = direction)
+        }
+        
+        completes_list[[p]] <- completes
+        diff[p] <- mean(imps)
+      }
+      
+      ESM_obs <- mean(diff)
+      
+    } else
+    {
+      ### Calculate observed test statistic for complete data or randomized marker method
+      
+      for(p in 1:nMBD)
+      {
+        data <- data_list[[p]]
+        
+        observed.a <- data[, 2][data[, 1] == "A"]
+        observed.b <- data[, 2][data[, 1] == "B"]
+        
+        diff[p] <- ESM_calc(ESM = ESM, scores.a = observed.a, scores.b = observed.b, method = method, direction = direction)
+      }
+      
+      ESM_obs <- mean(diff[is.finite(diff)])
+    }
+    
+    if(is.nan(ESM_obs))
+      stop("Observed test statistic invalid")
+    
+    ### Generate Monte Carlo randomizations and calculate statistic for each randomization
+    
+    RD <- numeric(nMC)
+    startpoints <- (limit_phase + 1):(MT - limit_phase + 1)
+    
+    for (i in 1:(nMC-1))
+    {
+      ### Randomly select start points for each participant
+      combstartpts <- sample(startpoints, nMBD) 
+      
+      if(method == "MI")
+      {
+        ### Calculate average statistic from multiple imputations for each participant
+        
+        for(p in 1:nMBD)
+        {
+          index.a <- 1:(combstartpts[p] - 1)
+          index.b <- combstartpts[p]:MT
+          completes <- completes_list[[p]]
+          
+          for(k in 1:nMI)
+          {
+            ascores <- completes[,k][index.a]
+            bscores <- completes[,k][index.b]
+            
+            imps[k] <- ESM_calc(ESM = ESM, scores.a = ascores, scores.b = bscores, method = method, direction = direction)
+          }
+          diff[p] <- mean(imps)
+        }
+        
+        RD[i] <- mean(diff)
+        
+      } else
+      {
+        ### Calculate statistic for each participant (for complete data or randomized marker method)
+        
+        for(p in 1:nMBD)
+        {
+          observed <- data_list[[p]][,2]
+          
+          ascores <- observed[1:(combstartpts[p] - 1)] 
+          bscores <- observed[combstartpts[p]:MT]
+          
+          diff[p] <- ESM_calc(ESM = ESM, scores.a = ascores, scores.b = bscores, method = method, direction = direction)
+        }
+        
+        RD[i] <- mean(diff[is.finite(diff)])
+      }
+      
+      if(is.nan(RD[i]))
+        RD[i] <- Inf
     }
     
     ### Add observed statistic to Monte Carlo distribution
