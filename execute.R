@@ -29,7 +29,7 @@ nCP <- 1              # Number of assignments per simulated dataset (>1 only if 
 nMBD <- 4             # Number of participants in MBD
 nMC <- 1000           # Number of randomizations in Monte Carlo randomization test
 nMI <- 10             # Number of imputations in multiple imputation
-replications <- 1000  # Number of simulated datasets
+replications <- 10000 # Number of simulated datasets
 
 ### Run simulation
 
